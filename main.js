@@ -7,43 +7,16 @@ import "./lib/renderer/Skybox.js";
 import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
-//import { OBB } from 'three/examples/jsm/math/OBB.js';
 import { OBB } from 'three/addons/math/OBB.js';
+import { generateMeshOOBColliders , createOBBHelper } from './lib/physics/Collider.js';
 
 
 
 
-  function createOBBHelper(obb, color = 0xff0000) {
-    const geometry = new THREE.BoxGeometry(
-      obb.halfSize.x * 2,
-      obb.halfSize.y * 2,
-      obb.halfSize.z * 2
-    );
   
-    const edges = new THREE.EdgesGeometry(geometry);
-    const material = new THREE.LineBasicMaterial({ color });
-    const wireframe = new THREE.LineSegments(edges, material);
-  
-    // Create a matrix from rotation and center
-    const matrix = new THREE.Matrix4();
-  
-    // Convert 3x3 rotation matrix to 4x4
-    const rotationMatrix = new THREE.Matrix4().setFromMatrix3(obb.rotation);
-  
-    // Set position
-    matrix.makeTranslation(obb.center.x, obb.center.y, obb.center.z);
-  
-    // Combine rotation and translation
-    wireframe.applyMatrix4(rotationMatrix);
-    wireframe.applyMatrix4(matrix);
-  
-    return wireframe;
-  }
 
 
 
-  var colliders = [];
-  var helpers = [];
 
 
 async function main () {
@@ -91,36 +64,20 @@ async function main () {
     const cannonModel = await modelLoader.loadAsync('Assets/model/cannon/scene.gltf');
     const cannon = cannonModel.scene;
     cannon.scale.set(0.001,0.001,0.001);
-
     cannon.rotateY(MathUtils.degToRad(90));
     cannon.rotateX(MathUtils.degToRad(15));
-
     cannon.position.set(0,0.4,0);
-
-    cannon.updateWorldMatrix(true);
-    const worldMatrix = cannon.matrixWorld.clone();
-    cannon.scale.set(1,1,1);
-    cannon.rotation.set(0, 0, 0);
-    cannon.position.set(0,0,0);
-
     cannon.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
-
-        child.updateWorldMatrix(true);
-
-        let obb = new OBB();
-        const box = new THREE.Box3().setFromObject(child,false);
-        obb.fromBox3(box);
-        colliders.push(obb);
     }
     });
     scene.add(cannon);
-    cannon.applyMatrix4(worldMatrix);
-
+    generateMeshOOBColliders(cannon);
     
+
 
     const shellModel = await modelLoader.loadAsync('Assets/model/cannonball/scene.gltf');
     const shell = shellModel.scene;
@@ -131,18 +88,12 @@ async function main () {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
-
-        // Compute bounding box collider
-        child.updateWorldMatrix(true, true);
-        const box = new THREE.Box3().setFromObject(child,true);
-        const helper = new THREE.Box3Helper(box, 0x00ff00);
-        scene.add(helper);
     }
     });
     scene.add(shell);
-    
+    generateMeshOOBColliders(shell);
 
-    
+
 
     /* Physics */
     //const pshell = new RigidBody(shell,1.0,0.5,0.4);
@@ -150,25 +101,43 @@ async function main () {
 
 
 
-
+    let helpers = [];
 
     const clock = new THREE.Clock();
 
     function animate(time) {
         //pshell.addForce(new THREE.Vector3(5, 0, 0));
 
-        helpers = [];
-        cannon.updateWorldMatrix(true);
-        const worldMatrix = cannon.matrixWorld.clone();
-        for (let collider of colliders) {
-        const obb = new OBB();
-        obb.copy(collider);
-        obb.applyMatrix4(worldMatrix)
-        const obbHelper = createOBBHelper(obb);
-        helpers.push(helpers);
-        scene.add(obbHelper);
-        }
+        shell.rotateY(MathUtils.degToRad(1));
+        cannon.rotateZ(MathUtils.degToRad(1));
 
+        helpers = [];
+        shell.updateWorldMatrix(true);
+
+        const cannonWorldMatrix = cannon.matrixWorld.clone();
+        const shellWorldMatrix = shell.matrixWorld.clone();
+
+        cannon.traverse(function (child) {
+        if (child.isMesh) {
+            const obb = new OBB();
+            obb.copy(child.collider);
+            obb.applyMatrix4(cannonWorldMatrix);
+            const obbHelper = createOBBHelper(obb);
+            helpers.push(obbHelper);
+            scene.add(obbHelper);
+        }
+        });
+
+        shell.traverse(function (child) {
+        if (child.isMesh) {
+            const obb = new OBB();
+            obb.copy(child.collider);
+            obb.applyMatrix4(shellWorldMatrix);
+            const obbHelper = createOBBHelper(obb);
+            helpers.push(obbHelper);
+            scene.add(obbHelper);
+        }
+        });
 
         const delta = clock.getDelta();
         physicsEngine.update(delta/10);
