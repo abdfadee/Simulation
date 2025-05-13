@@ -12,14 +12,6 @@ import { OBB } from 'three/addons/math/OBB.js';
 
 
 
-function computeMeshOBB(mesh) {
-    let obb = new OBB();
-
-    const box = new THREE.Box3().setFromObject(mesh,true);
-    obb.fromBox3(box);
-
-    return obb;
-  }
 
   function createOBBHelper(obb, color = 0xff0000) {
     const geometry = new THREE.BoxGeometry(
@@ -50,6 +42,10 @@ function computeMeshOBB(mesh) {
 
 
 
+  var colliders = [];
+  var helpers = [];
+
+
 async function main () {
     camera.position.set(0,8,8);
     
@@ -58,6 +54,7 @@ async function main () {
     /* Rendering */
     
     // Ground
+    /*
     const floorGeometry = new THREE.PlaneGeometry(100,100,1000,1000);
 
     const floorAlbedo = textureLoader.load("./assets/texture/PavingStones115/PavingStones115B_1K-JPG_Color.jpg");
@@ -87,71 +84,41 @@ async function main () {
     floor.rotateX(MathUtils.degToRad(-90.0));
     floor.receiveShadow = true;
     scene.add(floor);
-
+    */
 
 
     
     const cannonModel = await modelLoader.loadAsync('Assets/model/cannon/scene.gltf');
     const cannon = cannonModel.scene;
     cannon.scale.set(0.001,0.001,0.001);
-    cannon.rotateY(MathUtils.degToRad(15));
+
+    cannon.rotateY(MathUtils.degToRad(90));
     cannon.rotateX(MathUtils.degToRad(15));
+
     cannon.position.set(0,0.4,0);
+
+    cannon.updateWorldMatrix(true);
+    const worldMatrix = cannon.matrixWorld.clone();
+    cannon.scale.set(1,1,1);
+    cannon.rotation.set(0, 0, 0);
+    cannon.position.set(0,0,0);
+
     cannon.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
-    }
-    });
-    cannon.traverse(function (child) {
-    if (child.isMesh) {
-        child.castShadow = true
-        child.receiveShadow = true
-        child.side = THREE.BackSide;
 
-        // Force world matrix update
-        child.updateWorldMatrix(true, false);
+        child.updateWorldMatrix(true);
 
-
-        const meshOBB = computeMeshOBB(child);
-        const obbHelper = createOBBHelper(meshOBB);
-        scene.add(obbHelper);
-
-
-        /*
-        // Get bounding box in local space
-        child.geometry.computeBoundingBox();
-        const box = child.geometry.boundingBox.clone();
-        box.applyMatrix4(child.matrixWorld);
-
-        const helper = new THREE.Box3Helper(box, 0x00ff00);
-        scene.add(helper);
-        */
-    
-        /*
-        // Compute bounding box collider
-        child.updateWorldMatrix(true, true);
-        const collider = new THREE.Box3().setFromObject(child,false);
-        const helper = new THREE.Box3Helper(collider, 0x00ff00);
-        scene.add(helper);
-        */
-
-        /*
-        const boxGeo = new THREE.BoxGeometry(size.x, size.y, size.z);
-        boxGeo.translate(center.x, center.y, center.z);
-
-        const collider = new THREE.Mesh(
-        boxGeo,
-        new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: true })
-        );
-
-        scene.add(collider);
-        */
+        let obb = new OBB();
+        const box = new THREE.Box3().setFromObject(child,false);
+        obb.fromBox3(box);
+        colliders.push(obb);
     }
     });
     scene.add(cannon);
-    
+    cannon.applyMatrix4(worldMatrix);
 
     
 
@@ -175,16 +142,7 @@ async function main () {
     scene.add(shell);
     
 
-
-    /*
-    const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(1),
-        new THREE.MeshBasicMaterial()
-    );
-    mesh.geometry.computeBoundingBox();
-    scene.add(mesh);
-    */
-
+    
 
     /* Physics */
     //const pshell = new RigidBody(shell,1.0,0.5,0.4);
@@ -199,6 +157,19 @@ async function main () {
     function animate(time) {
         //pshell.addForce(new THREE.Vector3(5, 0, 0));
 
+        helpers = [];
+        cannon.updateWorldMatrix(true);
+        const worldMatrix = cannon.matrixWorld.clone();
+        for (let collider of colliders) {
+        const obb = new OBB();
+        obb.copy(collider);
+        obb.applyMatrix4(worldMatrix)
+        const obbHelper = createOBBHelper(obb);
+        helpers.push(helpers);
+        scene.add(obbHelper);
+        }
+
+
         const delta = clock.getDelta();
         physicsEngine.update(delta/10);
 
@@ -206,6 +177,10 @@ async function main () {
         //camera.updateProjectionMatrix();
 
         renderer.render( scene, camera );
+
+        for (let helper of helpers) {
+            scene.remove(helper);
+        }
     }
     renderer.setAnimationLoop( animate );
 }
