@@ -8,9 +8,8 @@ import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
 import { OBB } from 'three/addons/math/OBB.js';
-import { generateMeshOOBColliders , createOBBHelper } from './lib/physics/Collider.js';
-
-
+import { generateMeshOBBColliders , createOBBHelper } from './lib/physics/colliders/OBBCollider.js';
+import { generateMeshAABBColliders , generateMeshSphereColliders} from './lib/physics/Collider.js';
 
 
   
@@ -75,13 +74,12 @@ async function main () {
     }
     });
     scene.add(cannon);
-    generateMeshOOBColliders(cannon);
     
 
 
-    const shellModel = await modelLoader.loadAsync('Assets/model/cannonball/scene.gltf');
+    const shellModel = await modelLoader.loadAsync('Assets/model/shell/scene.gltf');
     const shell = shellModel.scene;
-    shell.scale.set(2.5,2.5,2.5);
+    shell.scale.set(0.001,0.001,0.001);
     shell.position.set(0,5,0);
     shell.traverse(function (child) {
     if (child.isMesh) {
@@ -91,7 +89,6 @@ async function main () {
     }
     });
     scene.add(shell);
-    generateMeshOOBColliders(shell);
 
 
 
@@ -101,9 +98,9 @@ async function main () {
 
 
 
-    let helpers = [];
 
     const clock = new THREE.Clock();
+
 
     function animate(time) {
         //pshell.addForce(new THREE.Vector3(5, 0, 0));
@@ -111,12 +108,46 @@ async function main () {
         shell.rotateY(MathUtils.degToRad(1));
         cannon.rotateZ(MathUtils.degToRad(1));
 
-        helpers = [];
-        shell.updateWorldMatrix(true);
+        let helpers = [];
+        //cannon.updateWorldMatrix(true);
+        //shell.updateWorldMatrix(true);
 
-        const cannonWorldMatrix = cannon.matrixWorld.clone();
-        const shellWorldMatrix = shell.matrixWorld.clone();
+        //const cannonWorldMatrix = cannon.matrixWorld.clone();
+        //const shellWorldMatrix = shell.matrixWorld.clone();
 
+
+        generateMeshAABBColliders(cannon);
+        cannon.traverse(function (child) {
+
+            if (child.isMesh) {
+                const helper = new THREE.Box3Helper(child.collider,0xFF0000);
+                scene.add(helper);
+                helpers.push(helper);
+            }
+
+        });
+
+
+        generateMeshSphereColliders(shell);
+        shell.traverse(function (child) {
+
+            if (child.isMesh) {
+            const sphere = child.collider;
+            const helper = new THREE.Mesh(
+            new THREE.SphereGeometry(sphere.radius, 16, 16),
+            new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+            );
+            helper.position.copy(sphere.center);
+            scene.add(helper);
+            helpers.push(helper);
+            }
+
+        });
+
+        
+
+
+        /*
         cannon.traverse(function (child) {
         if (child.isMesh) {
             const obb = new OBB();
@@ -127,17 +158,7 @@ async function main () {
             scene.add(obbHelper);
         }
         });
-
-        shell.traverse(function (child) {
-        if (child.isMesh) {
-            const obb = new OBB();
-            obb.copy(child.collider);
-            obb.applyMatrix4(shellWorldMatrix);
-            const obbHelper = createOBBHelper(obb);
-            helpers.push(obbHelper);
-            scene.add(obbHelper);
-        }
-        });
+        */
 
         const delta = clock.getDelta();
         physicsEngine.update(delta/10);
