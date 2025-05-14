@@ -7,9 +7,8 @@ import "./lib/renderer/Skybox.js";
 import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
-import { OBB } from 'three/addons/math/OBB.js';
-import { generateMeshAABBColliders , generateMeshSphereColliders} from './lib/physics/Collider.js';
-
+import {} from "./lib/physics/Collision.js";
+import { MeshBVHHelper } from 'three-mesh-bvh';
 
   
 
@@ -59,42 +58,52 @@ async function main () {
 
 
     
-    const cannonModel = await modelLoader.loadAsync('Assets/model/cannon/scene.gltf');
-    const cannon = cannonModel.scene;
-    cannon.scale.set(0.001,0.001,0.001);
-    cannon.rotateY(MathUtils.degToRad(90));
-    cannon.rotateX(MathUtils.degToRad(15));
-    cannon.position.set(0,0.4,0);
-    cannon.traverse(function (child) {
+    const terrainModel = await modelLoader.loadAsync('Assets/model/g/scene.gltf');
+    const terrain = terrainModel.scene;
+    terrain.scale.set(1,1,1);
+    //terrain.rotateY(MathUtils.degToRad(90));
+    //terrain.rotateX(MathUtils.degToRad(15));
+    terrain.position.set(0,0.4,0);
+    terrain.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
+        child.geometry.computeBoundsTree();
+        child.visualizer = new MeshBVHHelper(child, 10); // Visualize 10 BVH levels
+        scene.add(child.visualizer);
     }
     });
-    scene.add(cannon);
+    scene.add(terrain);
+
     
 
 
-    const shellModel = await modelLoader.loadAsync('Assets/model/shell/scene.gltf');
+
+
+    const shellModel = await modelLoader.loadAsync('Assets/model/cannonball/scene.gltf');
     const shell = shellModel.scene;
-    shell.scale.set(0.001,0.001,0.001);
+    shell.scale.set(3,3,3);
     shell.position.set(0,5,0);
     shell.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
+        child.geometry.computeBoundsTree();
+        child.visualizer = new MeshBVHHelper(child, 10); // Visualize 10 BVH levels
+        scene.add(child.visualizer);
     }
     });
     scene.add(shell);
     
 
+    
 
 
     /* Physics */
-    //const pshell = new RigidBody(shell,1.0,0.5,0.4);
-    //physicsEngine.addBody(pshell);
+    const pshell = new RigidBody(shell,1.0,0.5,0.4);
+    physicsEngine.addBody(pshell);
 
 
 
@@ -103,42 +112,27 @@ async function main () {
 
 
     function animate(time) {
-        //pshell.addForce(new THREE.Vector3(5, 0, 0));
+        pshell.addForce(new THREE.Vector3(5, 0, 0));
 
         //shell.rotateY(MathUtils.degToRad(1));
-        //cannon.rotateZ(MathUtils.degToRad(1));
+        //terrain.rotateZ(MathUtils.degToRad(1));
+
+
+        terrain.traverse(function (child) {
+            if (child.isMesh) {
+                child.visualizer.update();
+            }
+        });
+
+        shell.traverse(function (child) {
+            if (child.isMesh) {
+                child.visualizer.update();
+            }
+        });
+
 
         let helpers = [];
 
-        
-        generateMeshAABBColliders(cannon);
-        cannon.traverse(function (child) {
-
-            if (child.isMesh) {
-                const helper = new THREE.Box3Helper(child.collider,0xFF0000);
-                scene.add(helper);
-                helpers.push(helper);
-            }
-
-        });
-
-
-        generateMeshSphereColliders(shell);
-        shell.traverse(function (child) {
-
-            if (child.isMesh) {
-            const sphere = child.collider;
-            const helper = new THREE.Mesh(
-            new THREE.SphereGeometry(sphere.radius, 16, 16),
-            new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-            );
-            helper.position.copy(sphere.center);
-            scene.add(helper);
-            helpers.push(helper);
-            }
-
-        });
-        
 
         //const delta = clock.getDelta();
         //physicsEngine.update(delta/10);
