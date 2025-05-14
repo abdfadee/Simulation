@@ -8,7 +8,6 @@ import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
 import { OBB } from 'three/addons/math/OBB.js';
-import { generateMeshOBBColliders , createOBBHelper } from './lib/physics/colliders/OBBCollider.js';
 import { generateMeshAABBColliders , generateMeshSphereColliders} from './lib/physics/Collider.js';
 
 
@@ -89,6 +88,7 @@ async function main () {
     }
     });
     scene.add(shell);
+    
 
 
 
@@ -105,17 +105,12 @@ async function main () {
     function animate(time) {
         //pshell.addForce(new THREE.Vector3(5, 0, 0));
 
-        shell.rotateY(MathUtils.degToRad(1));
-        cannon.rotateZ(MathUtils.degToRad(1));
+        //shell.rotateY(MathUtils.degToRad(1));
+        //cannon.rotateZ(MathUtils.degToRad(1));
 
         let helpers = [];
-        //cannon.updateWorldMatrix(true);
-        //shell.updateWorldMatrix(true);
 
-        //const cannonWorldMatrix = cannon.matrixWorld.clone();
-        //const shellWorldMatrix = shell.matrixWorld.clone();
-
-
+        
         generateMeshAABBColliders(cannon);
         cannon.traverse(function (child) {
 
@@ -143,25 +138,10 @@ async function main () {
             }
 
         });
-
         
 
-
-        /*
-        cannon.traverse(function (child) {
-        if (child.isMesh) {
-            const obb = new OBB();
-            obb.copy(child.collider);
-            obb.applyMatrix4(cannonWorldMatrix);
-            const obbHelper = createOBBHelper(obb);
-            helpers.push(obbHelper);
-            scene.add(obbHelper);
-        }
-        });
-        */
-
-        const delta = clock.getDelta();
-        physicsEngine.update(delta/10);
+        //const delta = clock.getDelta();
+        //physicsEngine.update(delta/10);
 
         //camera.lookAt(0,5,0);
         //camera.updateProjectionMatrix();
