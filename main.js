@@ -8,7 +8,8 @@ import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
 import {} from "./lib/physics/Collision.js";
-import { MeshBVHHelper } from 'three-mesh-bvh';
+import { MeshBVH , MeshBVHHelper } from 'three-mesh-bvh';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
   
 
@@ -58,25 +59,42 @@ async function main () {
 
 
     
+
+    
+
     const terrainModel = await modelLoader.loadAsync('Assets/model/g/scene.gltf');
     const terrain = terrainModel.scene;
     terrain.scale.set(1,1,1);
     //terrain.rotateY(MathUtils.degToRad(90));
     //terrain.rotateX(MathUtils.degToRad(15));
     terrain.position.set(0,0.4,0);
+    const terrainGeometries = [];
     terrain.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
+
+        child.updateMatrixWorld(true);
+
         child.geometry.computeBoundsTree();
-        child.visualizer = new MeshBVHHelper(child, 10); // Visualize 10 BVH levels
-        scene.add(child.visualizer);
+
+        const clonedGeo = child.geometry.clone();
+        clonedGeo.applyMatrix4(child.matrixWorld); // move to world space
+        clonedGeo.deleteAttribute('tangent');
+        terrainGeometries.push(clonedGeo);
+
+        //child.visualizer = new MeshBVHHelper(child , 10); // Visualize 10 BVH levels
+        //scene.add(child.visualizer);
     }
     });
     scene.add(terrain);
 
-    
+    const mergedGeometry = BufferGeometryUtils.mergeGeometries(terrainGeometries, false);
+    mergedGeometry.boundsTree = new MeshBVH(mergedGeometry);
+
+    const debugMesh = new THREE.Mesh(mergedGeometry, new THREE.MeshBasicMaterial({ wireframe: true }));
+    scene.add(debugMesh);
 
 
 
@@ -91,6 +109,7 @@ async function main () {
         child.receiveShadow = true
         child.side = THREE.BackSide;
         child.geometry.computeBoundsTree();
+
         child.visualizer = new MeshBVHHelper(child, 10); // Visualize 10 BVH levels
         scene.add(child.visualizer);
     }
@@ -112,39 +131,22 @@ async function main () {
 
 
     function animate(time) {
-        pshell.addForce(new THREE.Vector3(5, 0, 0));
-
         //shell.rotateY(MathUtils.degToRad(1));
+
         //terrain.rotateZ(MathUtils.degToRad(1));
+        //terrain.updateMatrixWorld(true);
 
-
-        terrain.traverse(function (child) {
-            if (child.isMesh) {
-                child.visualizer.update();
-            }
-        });
-
-        shell.traverse(function (child) {
-            if (child.isMesh) {
-                child.visualizer.update();
-            }
-        });
-
-
-        let helpers = [];
-
-
-        //const delta = clock.getDelta();
-        //physicsEngine.update(delta/10);
+        debugMesh.matrix.copy(terrain.matrixWorld); // Copies the world transform
+        debugMesh.matrixAutoUpdate = false; // Disable auto-update so the matrix is used directly
 
         //camera.lookAt(0,5,0);
         //camera.updateProjectionMatrix();
 
-        renderer.render( scene, camera );
+        //pshell.addForce(new THREE.Vector3(5, 0, 0));
+        const delta = clock.getDelta();
+        physicsEngine.update(delta/10);
 
-        for (let helper of helpers) {
-            scene.remove(helper);
-        }
+        renderer.render( scene, camera );
     }
     renderer.setAnimationLoop( animate );
 }
