@@ -8,13 +8,48 @@ import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
 import {} from "./lib/physics/Collision.js";
-import { MeshBVH , MeshBVHHelper } from 'three-mesh-bvh';
+import { MeshBVH , MeshBVHHelper , SAH } from 'three-mesh-bvh';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-  
 
 
+function generateCollisionMesh (mesh) {
+    const geometries = [];
 
+    mesh.traverse(function (child) {
+    if (child.isMesh) {
+        child.updateMatrixWorld(true);
+        const clonedGeo = child.geometry.clone();
+        clonedGeo.applyMatrix4(child.matrixWorld);
+        clonedGeo.deleteAttribute('tangent');
+        geometries.push(clonedGeo);
+    }
+    });
+
+    const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries, true);
+    mergedGeometry.boundsTree = new MeshBVH(mergedGeometry, {
+        strategy: SAH,
+        maxLeafTris: 1,
+    });
+
+    const mergedMesh = new THREE.Mesh(mergedGeometry, new THREE.MeshBasicMaterial({ wireframe: true,visible:false }));
+    mesh.collider = mergedMesh;
+    mesh.add(mesh.collider);
+
+    const helper = new MeshBVHHelper(mergedMesh,10);
+    helper.children[0].material.color.set(0xff0000);
+    helper.children[0].material.transparent = true
+    //scene.add(helper);
+}
+
+
+function getGeometryToBVH (meshA , meshB) {
+    const matrixToB = new THREE.Matrix4()
+        .copy(meshB.matrixWorld)
+        .invert()
+        .multiply(meshA.matrixWorld);
+    return matrixToB;
+}
 
 
 async function main () {
@@ -58,48 +93,27 @@ async function main () {
     */
 
 
-    
 
-    
-
-    const terrainModel = await modelLoader.loadAsync('Assets/model/g/scene.gltf');
+    const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const terrain = terrainModel.scene;
     terrain.scale.set(1,1,1);
     //terrain.rotateY(MathUtils.degToRad(90));
     //terrain.rotateX(MathUtils.degToRad(15));
     terrain.position.set(0,0.4,0);
-    const terrainGeometries = [];
     terrain.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
-
-        child.updateMatrixWorld(true);
-
-        child.geometry.computeBoundsTree();
-
-        const clonedGeo = child.geometry.clone();
-        clonedGeo.applyMatrix4(child.matrixWorld); // move to world space
-        clonedGeo.deleteAttribute('tangent');
-        terrainGeometries.push(clonedGeo);
-
-        //child.visualizer = new MeshBVHHelper(child , 10); // Visualize 10 BVH levels
-        //scene.add(child.visualizer);
     }
     });
     scene.add(terrain);
-
-    const mergedGeometry = BufferGeometryUtils.mergeGeometries(terrainGeometries, false);
-    mergedGeometry.boundsTree = new MeshBVH(mergedGeometry);
-
-    const debugMesh = new THREE.Mesh(mergedGeometry, new THREE.MeshBasicMaterial({ wireframe: true }));
-    scene.add(debugMesh);
+    generateCollisionMesh(terrain);
 
 
 
 
-    const shellModel = await modelLoader.loadAsync('Assets/model/cannonball/scene.gltf');
+    const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
     const shell = shellModel.scene;
     shell.scale.set(3,3,3);
     shell.position.set(0,5,0);
@@ -108,16 +122,11 @@ async function main () {
         child.castShadow = true
         child.receiveShadow = true
         child.side = THREE.BackSide;
-        child.geometry.computeBoundsTree();
-
-        child.visualizer = new MeshBVHHelper(child, 10); // Visualize 10 BVH levels
-        scene.add(child.visualizer);
     }
     });
     scene.add(shell);
-    
+    generateCollisionMesh(shell);
 
-    
 
 
     /* Physics */
@@ -128,21 +137,33 @@ async function main () {
 
 
     const clock = new THREE.Clock();
-
-
     function animate(time) {
+        const matrixToB = getGeometryToBVH(shell.collider,terrain.collider);
+
+        // Use boundsTree from meshA to check against meshB's geometry
+        const intersects = terrain.collider.geometry.boundsTree.intersectsGeometry(
+            shell.collider.geometry,
+            matrixToB
+        );
+
+        if (intersects) {
+        console.log('Collision detected!');
+        } else {
+        console.log('No collision.');
+        }
+
+
         //shell.rotateY(MathUtils.degToRad(1));
 
         //terrain.rotateZ(MathUtils.degToRad(1));
         //terrain.updateMatrixWorld(true);
 
-        debugMesh.matrix.copy(terrain.matrixWorld); // Copies the world transform
-        debugMesh.matrixAutoUpdate = false; // Disable auto-update so the matrix is used directly
+        //terrain.translateY(-0.001);
 
-        //camera.lookAt(0,5,0);
+        //camera.lookAt(shell.position);
         //camera.updateProjectionMatrix();
 
-        //pshell.addForce(new THREE.Vector3(5, 0, 0));
+        pshell.addForce(new THREE.Vector3(5, 0, 0));
         const delta = clock.getDelta();
         physicsEngine.update(delta/10);
 
