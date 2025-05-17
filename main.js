@@ -7,7 +7,7 @@ import "./lib/renderer/Skybox.js";
 import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
-import {getContact} from "./lib/physics/Collision.js";
+import "./lib/physics/CollisionDetection.js";
 
 
 
@@ -23,7 +23,6 @@ async function main () {
     const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const terrain3D = terrainModel.scene;
     terrain3D.scale.set(1,1,1);
-    terrain3D.position.set(0,0.4,0);
     terrain3D.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
@@ -37,7 +36,7 @@ async function main () {
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
     const shell3D = shellModel.scene;
     shell3D.scale.set(3,3,3);
-    shell3D.position.set(0,5,0);
+    shell3D.position.set(0,3,0);
     shell3D.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
@@ -54,33 +53,25 @@ async function main () {
     const terrain = new RigidBody(terrain3D,0.0,0.5,0.4);
     physicsEngine.addBody(terrain);
 
-    const shell = new RigidBody(shell3D,1.0,0.5,0.4);
+    const shell = new RigidBody(shell3D,10.0,0.5,0.4);
     physicsEngine.addBody(shell);
 
 
 
 
+    let accumulator = 0;
+    const fixedDelta = 1 / 60;
+
     const clock = new THREE.Clock();
     function animate(time) {
-        //camera.lookAt(shell.position);
-        //camera.updateProjectionMatrix();
+        camera.lookAt(shell3D.position);
+        camera.updateProjectionMatrix();
         
-        shell.addForce(new THREE.Vector3(5, 0, 0));
+        //shell.addForce(new THREE.Vector3(5, 0, 0));
 
         const delta = clock.getDelta();
-        physicsEngine.update(delta/10);
-
-        /*
-        const intersects = shell.intersects(terrain);
-        if (intersects) {
-        console.log('Collision detected!');
-        } else {
-        console.log('No collision.');
-        }
-        */
-
-        const contact = getContact(shell,terrain);
-        console.log(contact);
+        accumulator += delta;
+        physicsEngine.update(delta/20);
 
         renderer.render( scene, camera );
     }
