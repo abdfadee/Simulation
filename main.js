@@ -51,25 +51,27 @@ async function main () {
     const terrain = new RigidBody(terrain3D,0.0,1.0,0.4);
     physicsEngine.addBody(terrain);
 
-    const shell = new RigidBody(shell3D,5.0,0.5,0.4);
+    const shell = new RigidBody(shell3D,15.0,0.5,0.4);
     physicsEngine.addBody(shell);
 
+    const shell2 = new RigidBody(shell3D,15.0,0.5,0.4);
+    shell2.representation.position.copy(new THREE.Vector3(-2,6,0));
+    physicsEngine.addBody(shell2);
+
+    const shell3 = new RigidBody(shell3D,15.0,0.5,0.4);
+    shell3.representation.position.copy(new THREE.Vector3(2,6,0));
+    physicsEngine.addBody(shell3);
 
 
-
-    let accumulator = 0;
-    const fixedDelta = 1 / 60;
+    camera.lookAt(new THREE.Vector3(0,0,0));
+    camera.updateProjectionMatrix();
 
     const clock = new THREE.Clock();
     function animate(time) {
-        camera.lookAt(shell.representation.position);
-        camera.updateProjectionMatrix();
-        
         //shell.addForce(new THREE.Vector3(5, 0, 0));
 
         const delta = clock.getDelta();
-        accumulator += delta;
-        physicsEngine.update(delta/5);
+        physicsEngine.update(delta/10);
 
         renderer.render( scene, camera );
     }
