@@ -30,7 +30,6 @@ async function main () {
         child.side = THREE.BackSide;
     }
     });
-    terrain3D.generateCollisionMesh();
 
 
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
@@ -44,7 +43,6 @@ async function main () {
         child.side = THREE.BackSide;
     }
     });
-    shell3D.generateCollisionMesh();
 
 
 
@@ -64,7 +62,7 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
-        camera.lookAt(shell3D.position);
+        camera.lookAt(shell.representation.position);
         camera.updateProjectionMatrix();
         
         //shell.addForce(new THREE.Vector3(5, 0, 0));
