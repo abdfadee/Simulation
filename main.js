@@ -35,7 +35,7 @@ async function main () {
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
     const shell3D = shellModel.scene;
     shell3D.scale.set(3,3,3);
-    shell3D.position.set(0,3,0);
+    shell3D.position.set(0,6,0);
     shell3D.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
@@ -48,10 +48,10 @@ async function main () {
 
 
     /* Physics */
-    const terrain = new RigidBody(terrain3D,0.0,0.5,0.4);
+    const terrain = new RigidBody(terrain3D,0.0,1.0,0.4);
     physicsEngine.addBody(terrain);
 
-    const shell = new RigidBody(shell3D,10.0,0.5,0.4);
+    const shell = new RigidBody(shell3D,5.0,0.5,0.4);
     physicsEngine.addBody(shell);
 
 
@@ -69,7 +69,7 @@ async function main () {
 
         const delta = clock.getDelta();
         accumulator += delta;
-        physicsEngine.update(delta/20);
+        physicsEngine.update(delta/5);
 
         renderer.render( scene, camera );
     }
