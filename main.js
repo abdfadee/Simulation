@@ -7,7 +7,9 @@ import "./lib/renderer/Skybox.js";
 import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 
-import "./lib/physics/CollisionDetection.js";
+import {mergeGeometries} from "./lib/physics/collision/CollisionDetection.js";
+import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
+
 
 
 
@@ -45,9 +47,25 @@ async function main () {
     });
 
 
+    //scene.add(terrain3D);
 
+    const geometry = mergeGeometries(shell3D);
+    const points = [];
+    const posAttr = geometry.getAttribute('position');
+    for (let i = 0; i < posAttr.count; i++) {
+    points.push(new THREE.Vector3().fromBufferAttribute(posAttr, i));
+    }
+    const hullGeometry = new ConvexGeometry(points);
 
+    const helper = new THREE.Mesh(
+        hullGeometry,
+        new THREE.MeshBasicMaterial({wireframe: true})
+    );
+    scene.add(helper);
+
+    
     /* Physics */
+    /*
     const terrain = new RigidBody(terrain3D,0.0,1.0,0.4);
     physicsEngine.addBody(terrain);
 
@@ -61,6 +79,8 @@ async function main () {
     const shell3 = new RigidBody(shell3D,1,0.5,0.4);
     shell3.representation.position.copy(new THREE.Vector3(2,6,0));
     physicsEngine.addBody(shell3);
+    */
+
 
 
     camera.lookAt(new THREE.Vector3(0,0,0));
@@ -70,8 +90,8 @@ async function main () {
     function animate(time) {
         //shell.addForce(new THREE.Vector3(5, -1000, 0));
 
-        const delta = clock.getDelta();
-        physicsEngine.update(delta/5);
+        //const delta = clock.getDelta();
+        //physicsEngine.update(delta/5);
 
         renderer.render( scene, camera );
     }
