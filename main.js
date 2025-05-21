@@ -19,6 +19,7 @@ async function main () {
     
 
     /* Rendering */
+    /*
     const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const terrain3D = terrainModel.scene;
     terrain3D.scale.set(1,1,1);
@@ -29,6 +30,12 @@ async function main () {
         child.side = THREE.BackSide;
     }
     });
+    */
+
+    const terrain3D = new THREE.Mesh(
+        new THREE.BoxGeometry(100,1,100),
+        new THREE.MeshBasicMaterial()
+    );
 
 
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
@@ -47,7 +54,7 @@ async function main () {
 
     
     /* Physics */
-    const terrain = new RigidBody(terrain3D,0.0,1.0,0.4);
+    const terrain = new RigidBody(terrain3D,0.0,0.5,0.4);
     physicsEngine.addBody(terrain);
 
     const shell = new RigidBody(shell3D,100,0.5,0.4,"sphere");
@@ -70,15 +77,14 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
-        camera.lookAt(shell.representation.position);
-        camera.updateProjectionMatrix();
+        //camera.lookAt(shell.representation.position);
+        //camera.updateProjectionMatrix();
 
-        shell.addForce(new THREE.Vector3(0, -5000, 0));
-
-        console.log(shell.velocity.length());
+        shell.addForce(new THREE.Vector3(1000, 0, 0));
+        console.log(shell.representation.quaternion);
 
         const delta = clock.getDelta();
-        physicsEngine.update(delta/4);
+        physicsEngine.update(delta/3);
 
         renderer.render( scene, camera );
     }
