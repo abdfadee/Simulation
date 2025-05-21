@@ -50,8 +50,8 @@ async function main () {
     const terrain = new RigidBody(terrain3D,0.0,1.0,0.4);
     physicsEngine.addBody(terrain);
 
-    const shell = new RigidBody(shell3D,100,0.5,0.4,"box");
-    shell.representation.position.set(-2,6,0);
+    const shell = new RigidBody(shell3D,100,0.5,0.4,"sphere");
+    shell.representation.position.set(-2,16,0);
     physicsEngine.addBody(shell);
 
     /*
@@ -70,7 +70,12 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
-        //shell.addForce(new THREE.Vector3(50, -500, 0));
+        camera.lookAt(shell.representation.position);
+        camera.updateProjectionMatrix();
+
+        shell.addForce(new THREE.Vector3(0, -5000, 0));
+
+        console.log(shell.velocity.length());
 
         const delta = clock.getDelta();
         physicsEngine.update(delta/4);
