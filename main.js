@@ -32,10 +32,12 @@ async function main () {
     });
     */
 
+    
     const terrain3D = new THREE.Mesh(
-        new THREE.BoxGeometry(100,1,100),
-        new THREE.MeshBasicMaterial()
+        new THREE.BoxGeometry(100,3,100),
+        new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
+    
 
 
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
@@ -54,22 +56,23 @@ async function main () {
 
     
     /* Physics */
-    const terrain = new RigidBody(terrain3D,0.0,0.5,0.4);
+    const terrain = new RigidBody(terrain3D,0.0,1.0,0.4,"box");
     physicsEngine.addBody(terrain);
 
-    const shell = new RigidBody(shell3D,100,0.5,0.4,"sphere");
-    shell.representation.position.set(-2,16,0);
-    physicsEngine.addBody(shell);
+    
 
-    /*
-    const shell2 = new RigidBody(shell3D,1,0.5,0.4);
-    shell2.representation.position.copy(new THREE.Vector3(-2,6,0));
-    physicsEngine.addBody(shell2);
-
-    const shell3 = new RigidBody(shell3D,1,0.5,0.4);
-    shell3.representation.position.copy(new THREE.Vector3(2,6,0));
-    physicsEngine.addBody(shell3);
-    */
+    
+    window.addEventListener('keydown', (event) => {
+        switch (event.key) {
+            case ' ':
+                const shell = new RigidBody(shell3D,1,0.5,0.4,"sphere");
+                shell.representation.position.set(0,6,0);
+                physicsEngine.addBody(shell);
+                break;
+            default:
+                break;
+        }
+    });
 
 
     camera.lookAt(new THREE.Vector3(0,0,0));
@@ -80,11 +83,10 @@ async function main () {
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
-        shell.addForce(new THREE.Vector3(1000, 0, 0));
-        console.log(shell.representation.quaternion);
+        //shell.addForce(new THREE.Vector3(1000, 0, 0));
 
         const delta = clock.getDelta();
-        physicsEngine.update(delta/3);
+        physicsEngine.update(delta/2);
 
         renderer.render( scene, camera );
     }
