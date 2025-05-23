@@ -19,7 +19,6 @@ async function main () {
     
 
     /* Rendering */
-    /*
     const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const terrain3D = terrainModel.scene;
     terrain3D.scale.set(1,1,1);
@@ -30,19 +29,19 @@ async function main () {
         child.side = THREE.BackSide;
     }
     });
-    */
 
-    
+    /*
     const terrain3D = new THREE.Mesh(
-        new THREE.BoxGeometry(100,3,100),
+        new THREE.BoxGeometry(10,3,10),
         new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
+    */
     
 
 
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
     const shell3D = shellModel.scene;
-    shell3D.scale.set(3,3,3);
+    shell3D.scale.set(5,5,5);
     shell3D.traverse(function (child) {
     if (child.isMesh) {
         child.castShadow = true
@@ -56,7 +55,7 @@ async function main () {
 
     
     /* Physics */
-    const terrain = new RigidBody(terrain3D,0.0,1.0,0.4,"box");
+    const terrain = new RigidBody(terrain3D,0.0,1.0,0.4,"bvh");
     physicsEngine.addBody(terrain);
 
     
@@ -65,7 +64,7 @@ async function main () {
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
             case ' ':
-                const shell = new RigidBody(shell3D,1,0.5,0.4,"sphere");
+                const shell = new RigidBody(shell3D,1,0.5,0.4,"box");
                 shell.representation.position.set(0,6,0);
                 physicsEngine.addBody(shell);
                 break;
@@ -80,6 +79,7 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
+        //terrain.representation.rotateX(MathUtils.degToRad(0.05));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
