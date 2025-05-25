@@ -2,7 +2,7 @@ import * as THREE from "three";
 import * as MathUtils from "three/src/math/MathUtils";
 
 import {renderer,textureLoader,modelLoader,scene,camera} from "./lib/renderer/Initialize";
-//import "./lib/renderer/Skybox.js";
+import "./lib/renderer/Skybox.js";
 
 import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
@@ -20,6 +20,12 @@ async function main () {
 
 
     /* Rendering */
+    const objectModel = await modelLoader.loadAsync('assets/model/cannon/scene.gltf');
+    const object3D = objectModel.scene;
+    const object = new RigidBody(object3D,0.0,0.5,0.8,"box");
+    physicsEngine.addBody(object);
+
+
     /*
     const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const terrain3D = terrainModel.scene;
@@ -33,12 +39,10 @@ async function main () {
     });
     */
 
-    
     const terrain3D = new THREE.Mesh(
         new THREE.BoxGeometry(10,3,10),
         new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
-    
     
 
 
@@ -69,8 +73,8 @@ async function main () {
 
     
     /* Physics */
-    const terrain = new RigidBody(terrain3D,0.0,0.5,0.8,"box");
-    physicsEngine.addBody(terrain);
+    //const terrain = new RigidBody(terrain3D,0.0,0.5,0.8,"box");
+    //physicsEngine.addBody(terrain);
 
     
 
@@ -98,7 +102,8 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
-        terrain.representation.rotateX(MathUtils.degToRad(0.05));
+        object.representation.scale.set(0.01,0.01,0.01);
+        object.representation.rotateX(MathUtils.degToRad(0.05));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
