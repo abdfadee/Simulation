@@ -102,8 +102,8 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
-        object.representation.scale.set(0.01,0.01,0.01);
-        object.representation.rotateX(MathUtils.degToRad(0.05));
+        //object.representation.scale.set(0.01,0.01,0.01);
+        //object.representation.rotateX(MathUtils.degToRad(0.05));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
