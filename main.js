@@ -20,44 +20,10 @@ async function main () {
 
 
     /* Rendering */
-    const objectModel = await modelLoader.loadAsync('assets/model/cannon/scene.gltf');
+    const objectModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const object3D = objectModel.scene;
     const object = new RigidBody(object3D,0.0,0.5,0.8,"box");
     physicsEngine.addBody(object);
-
-
-    /*
-    const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
-    const terrain3D = terrainModel.scene;
-    terrain3D.scale.set(1,1,1);
-    terrain3D.traverse(function (child) {
-    if (child.isMesh) {
-        child.castShadow = true
-        child.receiveShadow = true
-        child.side = THREE.BackSide;
-    }
-    });
-    */
-
-    const terrain3D = new THREE.Mesh(
-        new THREE.BoxGeometry(10,3,10),
-        new THREE.MeshBasicMaterial({color: 0xFF0000})
-    );
-    
-
-
-    /*
-    const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
-    const shell3D = shellModel.scene;
-    shell3D.scale.set(5,5,5);
-    shell3D.traverse(function (child) {
-    if (child.isMesh) {
-        child.castShadow = true
-        child.receiveShadow = true
-        child.side = THREE.BackSide;
-    }
-    });
-    */
 
 
     const sphere3D = new THREE.Mesh(
@@ -69,15 +35,7 @@ async function main () {
         new THREE.BoxGeometry(0.25,0.25,0.25),
         new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
-
-
     
-    /* Physics */
-    //const terrain = new RigidBody(terrain3D,0.0,0.5,0.8,"box");
-    //physicsEngine.addBody(terrain);
-
-    
-
     
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
@@ -102,7 +60,11 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
-        //object.representation.scale.set(0.01,0.01,0.01);
+        const helperGroup = new THREE.Group();
+        helperGroup.name = 'HelperVisualization';
+        scene.add(helperGroup);
+
+        object.representation.scale.set(0.01,0.01,0.01);
         //object.representation.rotateX(MathUtils.degToRad(0.05));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
@@ -113,6 +75,7 @@ async function main () {
         physicsEngine.update(delta/2);
 
         renderer.render( scene, camera );
+        scene.remove(helperGroup);
     }
     renderer.setAnimationLoop( animate );
 }
