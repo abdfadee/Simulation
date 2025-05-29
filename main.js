@@ -20,7 +20,7 @@ async function main () {
 
 
     /* Rendering */
-    const objectModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
+    const objectModel = await modelLoader.loadAsync('assets/model/cannon/scene.gltf');
     const object3D = objectModel.scene;
     const object = new RigidBody(object3D,0.0,0.5,0.8,"box");
     physicsEngine.addBody(object);
@@ -65,7 +65,7 @@ async function main () {
         scene.add(helperGroup);
 
         object.representation.scale.set(0.01,0.01,0.01);
-        //object.representation.rotateX(MathUtils.degToRad(0.05));
+        object.representation.rotateX(MathUtils.degToRad(0.05));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
