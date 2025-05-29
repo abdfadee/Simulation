@@ -18,13 +18,10 @@ async function main () {
     camera.position.set(0,8,8);
     
 
-
-    /* Rendering */
     const objectModel = await modelLoader.loadAsync('assets/model/cannon/scene.gltf');
     const object3D = objectModel.scene;
-    const object = new RigidBody(object3D,0.0,0.5,0.8,"box");
+    const object = new RigidBody(object3D,0.0,0.5,0.8,"bvh");
     physicsEngine.addBody(object);
-
 
     const sphere3D = new THREE.Mesh(
         new THREE.SphereGeometry(0.25),
