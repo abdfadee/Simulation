@@ -17,12 +17,24 @@ import RigidBody from "./lib/physics/RigidBody.js";
 async function main () {
     camera.position.set(0,8,8);
     
-
+    /*
     const objectModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const object3D = objectModel.scene;
     //object3D.scale.set(0.01,0.01,0.01);
-    const object = new RigidBody(object3D,0.0,0.5,0.8,"box");
+    const object = new RigidBody(object3D,0.0,0.5,0.8,"convex");
     physicsEngine.addBody(object);
+    */
+
+
+    const terrain3D = new THREE.Mesh(
+        new THREE.BoxGeometry(25,1,25),
+        new THREE.MeshBasicMaterial({color: 0xFF0000})
+    );
+    const terrain = new RigidBody(terrain3D,0.0,0.5,0.8,"convex");
+    physicsEngine.addBody(terrain);
+
+
+
 
     const sphere3D = new THREE.Mesh(
         new THREE.SphereGeometry(0.25),
@@ -38,12 +50,12 @@ async function main () {
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
             case 's':
-                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.8,"sphere");
+                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.8,"convex");
                 sphere.representation.position.set(0,6,0);
                 physicsEngine.addBody(sphere);
                 break;
             case 'b':
-                const box = new RigidBody(box3D.clone(),1,0.5,0.8,"box");
+                const box = new RigidBody(box3D.clone(),1,0.5,0.8,"convex");
                 box.representation.position.set(0,6,0);
                 physicsEngine.addBody(box);
                 break;
@@ -63,7 +75,7 @@ async function main () {
         scene.add(helperGroup);
 
         //object.representation.scale.set(0.01,0.01,0.01);
-        //object.representation.rotateX(MathUtils.degToRad(0.05));
+        //terrain.representation.rotateX(MathUtils.degToRad(0.05));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
