@@ -18,9 +18,10 @@ async function main () {
     camera.position.set(0,8,8);
     
 
-    const objectModel = await modelLoader.loadAsync('assets/model/cannon/scene.gltf');
+    const objectModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
     const object3D = objectModel.scene;
-    const object = new RigidBody(object3D,0.0,0.5,0.8,"bvh");
+    //object3D.scale.set(0.01,0.01,0.01);
+    const object = new RigidBody(object3D,0.0,0.5,0.8,"box");
     physicsEngine.addBody(object);
 
     const sphere3D = new THREE.Mesh(
@@ -37,12 +38,12 @@ async function main () {
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
             case 's':
-                const sphere = new RigidBody(sphere3D,1,0.5,0.8,"sphere");
+                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.8,"sphere");
                 sphere.representation.position.set(0,6,0);
                 physicsEngine.addBody(sphere);
                 break;
             case 'b':
-                const box = new RigidBody(box3D,1,0.5,0.8,"box");
+                const box = new RigidBody(box3D.clone(),1,0.5,0.8,"box");
                 box.representation.position.set(0,6,0);
                 physicsEngine.addBody(box);
                 break;
@@ -61,8 +62,8 @@ async function main () {
         helperGroup.name = 'HelperVisualization';
         scene.add(helperGroup);
 
-        object.representation.scale.set(0.01,0.01,0.01);
-        object.representation.rotateX(MathUtils.degToRad(0.05));
+        //object.representation.scale.set(0.01,0.01,0.01);
+        //object.representation.rotateX(MathUtils.degToRad(0.05));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
