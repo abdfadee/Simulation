@@ -30,7 +30,7 @@ async function main () {
         new THREE.BoxGeometry(25,1,25),
         new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
-    const terrain = new RigidBody(terrain3D,0.0,0.5,0.8,"convex");
+    const terrain = new RigidBody(terrain3D,0.0,1.0,0.5,"convex");
     physicsEngine.addBody(terrain);
 
 
@@ -50,12 +50,12 @@ async function main () {
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
             case 's':
-                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.8,"convex");
+                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.4,"convex");
                 sphere.representation.position.set(0,6,0);
                 physicsEngine.addBody(sphere);
                 break;
             case 'b':
-                const box = new RigidBody(box3D.clone(),1,0.5,0.8,"convex");
+                const box = new RigidBody(box3D.clone(),1,0.5,0.4,"convex");
                 box.representation.position.set(0,6,0);
                 physicsEngine.addBody(box);
                 break;
@@ -82,7 +82,7 @@ async function main () {
         //shell.addForce(new THREE.Vector3(1000, 0, 0));
 
         const delta = clock.getDelta();
-        physicsEngine.update(delta/2);
+        physicsEngine.update(delta/4);
 
         renderer.render( scene, camera );
         scene.remove(helperGroup);
