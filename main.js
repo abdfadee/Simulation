@@ -50,12 +50,12 @@ async function main () {
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
             case 's':
-                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.4,"convex");
+                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.8,"convex");
                 sphere.representation.position.set(0,6,0);
                 physicsEngine.addBody(sphere);
                 break;
             case 'b':
-                const box = new RigidBody(box3D.clone(),1,0.5,0.4,"convex");
+                const box = new RigidBody(box3D.clone(),1,0.5,0.8,"convex");
                 box.representation.position.set(0,6,0);
                 physicsEngine.addBody(box);
                 break;
@@ -75,14 +75,14 @@ async function main () {
         scene.add(helperGroup);
 
         //object.representation.scale.set(0.01,0.01,0.01);
-        //terrain.representation.rotateX(MathUtils.degToRad(0.05));
+        terrain.representation.rotateX(MathUtils.degToRad(0.025));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
         //shell.addForce(new THREE.Vector3(1000, 0, 0));
 
         const delta = clock.getDelta();
-        physicsEngine.update(delta/4);
+        physicsEngine.update(delta/3);
 
         renderer.render( scene, camera );
         scene.remove(helperGroup);
