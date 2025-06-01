@@ -8,6 +8,8 @@ import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
 import { applyQuadraticDrag, applyWind } from "./lib/physics/Forces.js";
 
+//import "./lib/objects/Cannon.js";
+import "./lib/objects/Turret.js";
 
 
 
@@ -20,13 +22,6 @@ async function main () {
 
     const objects = [];
     
-    const cannonModel = await modelLoader.loadAsync('assets/model/cannon/scene.gltf');
-    const cannon3D = cannonModel.scene;
-    cannon3D.scale.set(0.001,0.001,0.001);
-    const cannon = new RigidBody(cannon3D,0.5,0.5,0.8);
-    cannon.representation.position.set(0,0.5,0);
-    physicsEngine.addBody(cannon);
-
 
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
     const shell3D = shellModel.scene;
@@ -53,7 +48,7 @@ async function main () {
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
             case ' ':
-                const shell = new RigidBody(shell3D.clone(),0.5,0.5,0.8);
+                const shell = new RigidBody(shell3D.clone(),10,0.5,0.8);
                 shell.representation.position.set(0,6,0);
                 physicsEngine.addBody(shell);
                 objects.push(shell);
@@ -86,6 +81,8 @@ async function main () {
             applyWind(object);
         }
 
+        //armature.rotateY(MathUtils.degToRad(0.25));
+        //head.rotateX(MathUtils.degToRad(0.25));
         //object.representation.scale.set(0.01,0.01,0.01);
         //terrain.representation.rotateX(MathUtils.degToRad(0.025));
         //camera.lookAt(shell.representation.position);
