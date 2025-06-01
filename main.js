@@ -18,14 +18,14 @@ async function main () {
     camera.position.set(0,8,8);
     
     /*
-    const objectModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
-    const object3D = objectModel.scene;
-    //object3D.scale.set(0.01,0.01,0.01);
-    const object = new RigidBody(object3D,0.0,0.5,0.8,"convex");
-    physicsEngine.addBody(object);
+    const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
+    const terrain3D = terrainModel.scene;
+    //terrain3D.scale.set(0.01,0.01,0.01);
+    const terrain = new RigidBody(terrain3D,0.0,0.5,0.8,"bvh");
+    physicsEngine.addBody(terrain);
     */
 
-
+    
     const terrain3D = new THREE.Mesh(
         new THREE.BoxGeometry(25,1,25),
         new THREE.MeshBasicMaterial({color: 0xFF0000})
@@ -34,10 +34,14 @@ async function main () {
     physicsEngine.addBody(terrain);
 
 
-
+    const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
+    const shell3D = shellModel.scene;
+    shell3D.scale.set(3,3,3);
+    
+    
 
     const sphere3D = new THREE.Mesh(
-        new THREE.SphereGeometry(0.25),
+        new THREE.SphereGeometry(0.25,6,6),
         new THREE.MeshBasicMaterial({color: 0x0000FF})
     );
 
@@ -46,16 +50,20 @@ async function main () {
         new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
     
-    
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
+            case ' ':
+                const shell = new RigidBody(shell3D.clone(),0.5,0.5,0.8,"convex");
+                shell.representation.position.set(0,6,0);
+                physicsEngine.addBody(shell);
+                break;
             case 's':
-                const sphere = new RigidBody(sphere3D.clone(),1,0.5,0.8,"convex");
+                const sphere = new RigidBody(sphere3D.clone(),1,0.8,0.8,"convex");
                 sphere.representation.position.set(0,6,0);
                 physicsEngine.addBody(sphere);
                 break;
             case 'b':
-                const box = new RigidBody(box3D.clone(),1,0.5,0.8,"convex");
+                const box = new RigidBody(box3D.clone(),1,0.8,0.8,"convex");
                 box.representation.position.set(0,6,0);
                 physicsEngine.addBody(box);
                 break;
@@ -75,7 +83,7 @@ async function main () {
         scene.add(helperGroup);
 
         //object.representation.scale.set(0.01,0.01,0.01);
-        terrain.representation.rotateX(MathUtils.degToRad(0.025));
+        //terrain.representation.rotateX(MathUtils.degToRad(0.025));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
