@@ -6,6 +6,7 @@ import "./lib/renderer/Skybox.js";
 
 import physicsEngine from "./lib/physics/PhysicsEngine.js";
 import RigidBody from "./lib/physics/RigidBody.js";
+import { applyQuadraticDrag, applyWind } from "./lib/physics/Forces.js";
 
 
 
@@ -16,32 +17,31 @@ import RigidBody from "./lib/physics/RigidBody.js";
 
 async function main () {
     camera.position.set(0,8,8);
-    
-    /*
-    const terrainModel = await modelLoader.loadAsync('assets/model/terrain/scene.gltf');
-    const terrain3D = terrainModel.scene;
-    //terrain3D.scale.set(0.01,0.01,0.01);
-    const terrain = new RigidBody(terrain3D,0.0,0.5,0.8,"bvh");
-    physicsEngine.addBody(terrain);
-    */
 
+    const objects = [];
     
-    const terrain3D = new THREE.Mesh(
-        new THREE.BoxGeometry(25,1,25),
-        new THREE.MeshBasicMaterial({color: 0xFF0000})
-    );
-    const terrain = new RigidBody(terrain3D,0.0,1.0,0.5,"convex");
-    physicsEngine.addBody(terrain);
+    const cannonModel = await modelLoader.loadAsync('assets/model/cannon/scene.gltf');
+    const cannon3D = cannonModel.scene;
+    cannon3D.scale.set(0.001,0.001,0.001);
+    const cannon = new RigidBody(cannon3D,0.5,0.5,0.8);
+    cannon.representation.position.set(0,0.5,0);
+    physicsEngine.addBody(cannon);
 
 
     const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
     const shell3D = shellModel.scene;
     shell3D.scale.set(3,3,3);
-    
-    
+
+
+    const terrain3D = new THREE.Mesh(
+        new THREE.BoxGeometry(25,1,25),
+        new THREE.MeshBasicMaterial({color: 0xFF0000})
+    );
+    const terrain = new RigidBody(terrain3D,0.0,1.0,0.5);
+    physicsEngine.addBody(terrain);
 
     const sphere3D = new THREE.Mesh(
-        new THREE.SphereGeometry(0.25,6,6),
+        new THREE.SphereGeometry(0.25),
         new THREE.MeshBasicMaterial({color: 0x0000FF})
     );
 
@@ -53,19 +53,22 @@ async function main () {
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
             case ' ':
-                const shell = new RigidBody(shell3D.clone(),0.5,0.5,0.8,"convex");
+                const shell = new RigidBody(shell3D.clone(),0.5,0.5,0.8);
                 shell.representation.position.set(0,6,0);
                 physicsEngine.addBody(shell);
+                objects.push(shell);
                 break;
             case 's':
-                const sphere = new RigidBody(sphere3D.clone(),1,0.8,0.8,"convex");
+                const sphere = new RigidBody(sphere3D.clone(),1,0.8,0.8);
                 sphere.representation.position.set(0,6,0);
                 physicsEngine.addBody(sphere);
+                objects.push(sphere);
                 break;
             case 'b':
-                const box = new RigidBody(box3D.clone(),1,0.8,0.8,"convex");
+                const box = new RigidBody(box3D.clone(),1,0.8,0.8);
                 box.representation.position.set(0,6,0);
                 physicsEngine.addBody(box);
+                objects.push(box);
                 break;
             default:
                 break;
@@ -78,9 +81,10 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
-        const helperGroup = new THREE.Group();
-        helperGroup.name = 'HelperVisualization';
-        scene.add(helperGroup);
+        for (const object of objects) {
+            applyQuadraticDrag(object);
+            applyWind(object);
+        }
 
         //object.representation.scale.set(0.01,0.01,0.01);
         //terrain.representation.rotateX(MathUtils.degToRad(0.025));
@@ -93,7 +97,6 @@ async function main () {
         physicsEngine.update(delta/3);
 
         renderer.render( scene, camera );
-        scene.remove(helperGroup);
     }
     renderer.setAnimationLoop( animate );
 }
