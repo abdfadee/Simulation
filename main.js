@@ -90,7 +90,7 @@ async function main () {
 
 
         const delta = clock.getDelta();
-        physicsEngine.update(delta/3);
+        physicsEngine.update(delta/2);
 
         renderer.render( scene, camera );
     }
