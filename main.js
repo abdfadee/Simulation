@@ -21,19 +21,6 @@ async function main () {
     camera.position.set(0,8,8);
 
     const objects = [];
-    
-
-    const shellModel = await modelLoader.loadAsync('assets/model/cannonball/scene.gltf');
-    const shell3D = shellModel.scene;
-    shell3D.scale.set(3,3,3);
-
-
-    const terrain3D = new THREE.Mesh(
-        new THREE.BoxGeometry(25,1,25),
-        new THREE.MeshBasicMaterial({color: 0xFF0000})
-    );
-    //const terrain = new RigidBody(terrain3D,0.0,1.0,0.5);
-    //physicsEngine.addBody(terrain);
 
     const sphere3D = new THREE.Mesh(
         new THREE.SphereGeometry(0.25),
@@ -47,12 +34,6 @@ async function main () {
     
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
-            case ' ':
-                const shell = new RigidBody(shell3D.clone(),10,0.5,0.8);
-                shell.representation.position.set(0,6,0);
-                physicsEngine.addBody(shell);
-                objects.push(shell);
-                break;
             case 's':
                 const sphere = new RigidBody(sphere3D.clone(),1,0.8,0.8);
                 sphere.representation.position.set(0,6,0);
@@ -90,7 +71,7 @@ async function main () {
 
 
         const delta = clock.getDelta();
-        physicsEngine.update(delta/2);
+        physicsEngine.update(delta);
 
         renderer.render( scene, camera );
     }
