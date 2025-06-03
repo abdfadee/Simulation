@@ -2,14 +2,14 @@ import * as THREE from "three";
 import * as MathUtils from "three/src/math/MathUtils";
 
 import {renderer,textureLoader,modelLoader,scene,camera} from "./lib/renderer/Initialize";
-import "./lib/renderer/Skybox.js";
+import "./lib/renderer/Skybox";
 
-import physicsEngine from "./lib/physics/PhysicsEngine.js";
-import RigidBody from "./lib/physics/RigidBody.js";
-import { applyQuadraticDrag, applyWind } from "./lib/physics/Forces.js";
+import physicsEngine from "./lib/physics/PhysicsEngine";
+import RigidBody from "./lib/physics/RigidBody";
+import { applyQuadraticDrag, applyWind } from "./lib/physics/Forces";
 
-//import "./lib/objects/Cannon.js";
-import "./lib/objects/Turret.js";
+import "./lib/objects/Terrain";
+//import "./lib/objects/Turret";
 
 
 
@@ -32,8 +32,8 @@ async function main () {
         new THREE.BoxGeometry(25,1,25),
         new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
-    const terrain = new RigidBody(terrain3D,0.0,1.0,0.5);
-    physicsEngine.addBody(terrain);
+    //const terrain = new RigidBody(terrain3D,0.0,1.0,0.5);
+    //physicsEngine.addBody(terrain);
 
     const sphere3D = new THREE.Mesh(
         new THREE.SphereGeometry(0.25),
@@ -76,19 +76,18 @@ async function main () {
 
     const clock = new THREE.Clock();
     function animate(time) {
+
+        /*
         for (const object of objects) {
             applyQuadraticDrag(object);
             applyWind(object);
         }
+        //shell.addForce(new THREE.Vector3(1000, 0, 0));
+        */
 
-        //armature.rotateY(MathUtils.degToRad(0.25));
-        //head.rotateX(MathUtils.degToRad(0.25));
-        //object.representation.scale.set(0.01,0.01,0.01);
-        //terrain.representation.rotateX(MathUtils.degToRad(0.025));
         //camera.lookAt(shell.representation.position);
         //camera.updateProjectionMatrix();
 
-        //shell.addForce(new THREE.Vector3(1000, 0, 0));
 
         const delta = clock.getDelta();
         physicsEngine.update(delta/3);
