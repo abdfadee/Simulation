@@ -13,22 +13,18 @@ import "./lib/objects/Terrain";
 
 
 
-
-
-
-
 async function main () {
     camera.position.set(0,8,8);
 
     const objects = [];
 
     const sphere3D = new THREE.Mesh(
-        new THREE.SphereGeometry(0.25),
+        new THREE.SphereGeometry(0.5),
         new THREE.MeshBasicMaterial({color: 0x0000FF})
     );
 
     const box3D = new THREE.Mesh(
-        new THREE.BoxGeometry(0.25,0.25,0.25),
+        new THREE.BoxGeometry(0.5,0.5,0.5),
         new THREE.MeshBasicMaterial({color: 0xFF0000})
     );
     
@@ -36,7 +32,7 @@ async function main () {
         switch (event.key) {
             case 's':
                 const sphere = new RigidBody(sphere3D.clone(),1,0.8,0.8);
-                sphere.representation.position.set(0,6,0);
+                sphere.representation.position.set(1,6,0);
                 physicsEngine.addBody(sphere);
                 objects.push(sphere);
                 break;
@@ -55,26 +51,16 @@ async function main () {
     camera.lookAt(new THREE.Vector3(0,0,0));
     camera.updateProjectionMatrix();
 
-    const clock = new THREE.Clock();
     function animate(time) {
-
-        /*
-        for (const object of objects) {
-            applyQuadraticDrag(object);
-            applyWind(object);
-        }
-        //shell.addForce(new THREE.Vector3(1000, 0, 0));
-        */
-
-        //camera.lookAt(shell.representation.position);
-        //camera.updateProjectionMatrix();
-
-
-        const delta = clock.getDelta();
-        physicsEngine.update(delta);
-
         renderer.render( scene, camera );
     }
+
+    // fixed timestep for physics
+    const FIXED_DELTA = 1 / 60;
+    setInterval(() => {
+        physicsEngine.update(FIXED_DELTA);
+    }, FIXED_DELTA * 1000);
+
     renderer.setAnimationLoop( animate );
 }
 main();
