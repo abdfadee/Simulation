@@ -32,13 +32,13 @@ async function main () {
         switch (event.key) {
             case 's':
                 const sphere = new RigidBody(sphere3D.clone(),1,0.8,0.8);
-                sphere.representation.position.set(1,6,0);
+                sphere.representation.position.set(1,15,0);
                 physicsEngine.addBody(sphere);
                 objects.push(sphere);
                 break;
             case 'b':
-                const box = new RigidBody(box3D.clone(),1,0.8,0.8);
-                box.representation.position.set(0,6,0);
+                const box = new RigidBody(box3D.clone(),1,0.8,0.8,new THREE.Vector3(0.25,0,0));
+                box.representation.position.set(0,15,0);
                 physicsEngine.addBody(box);
                 objects.push(box);
                 break;
@@ -58,6 +58,9 @@ async function main () {
     // fixed timestep for physics
     const FIXED_DELTA = 1 / 60;
     setInterval(() => {
+
+        /* Apply Forces Here */
+
         physicsEngine.update(FIXED_DELTA);
     }, FIXED_DELTA * 1000);
 
