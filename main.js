@@ -6,7 +6,6 @@ import "./lib/renderer/Skybox";
 
 import physicsEngine from "./lib/physics/PhysicsEngine";
 import RigidBody from "./lib/physics/RigidBody";
-import { applyQuadraticDrag, applyWind } from "./lib/physics/Forces";
 
 import "./lib/objects/Terrain";
 //import "./lib/objects/Turret";
